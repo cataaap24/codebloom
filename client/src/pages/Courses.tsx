@@ -1,7 +1,7 @@
 import { trpc } from "@/lib/trpc";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { BookOpen, Plus, Pencil, Trash2, CheckCircle, PauseCircle, PlayCircle, X, Search, ExternalLink } from "lucide-react";
+import { BookOpen, Plus, Pencil, Trash2, CheckCircle, PauseCircle, PlayCircle, X, Search, ExternalLink, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
@@ -29,6 +29,12 @@ type FormData = {
   color: string;
   emoji: string;
   courseLink?: string;
+};
+
+type Metadata = {
+  title: string | null;
+  description: string | null;
+  image: string | null;
 };
 
 export default function Courses() {
@@ -64,12 +70,48 @@ export default function Courses() {
   const [editId, setEditId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<CourseStatus | "all">("all");
+  const [extractingMetadata, setExtractingMetadata] = useState(false);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({
     defaultValues: { name: "", description: "", category: "", progress: 0, status: "active", color: "#c4b5fd", emoji: "🌸", courseLink: "" },
   });
   const watchColor = watch("color");
   const watchEmoji = watch("emoji");
+  const watchCourseLink = watch("courseLink");
+
+  // Debounce para extraer metadatos
+  useEffect(() => {
+    if (!watchCourseLink || !watchCourseLink.startsWith("http")) return;
+
+    if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
+
+    debounceTimeoutRef.current = setTimeout(async () => {
+      setExtractingMetadata(true);
+      try {
+        const metadata = await utils.courses.extractMetadata.fetch({ url: watchCourseLink });
+        
+        if (metadata) {
+          if (metadata.title && !watch("name")) {
+            setValue("name", metadata.title);
+            toast.success("Título extraído automáticamente ✨");
+          }
+          if (metadata.description && !watch("description")) {
+            setValue("description", metadata.description);
+          }
+        }
+      } catch (error: any) {
+        console.error("Error extrayendo metadatos:", error);
+        toast.error("No se pudo extraer la información del enlace");
+      } finally {
+        setExtractingMetadata(false);
+      }
+    }, 1000);
+
+    return () => {
+      if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
+    };
+  }, [watchCourseLink, watch, setValue]);
 
   const openCreate = () => { reset({ name: "", description: "", category: "", progress: 0, status: "active", color: "#c4b5fd", emoji: "🌸", courseLink: "" }); setEditId(null); setShowForm(true); };
   const openEdit = (course: NonNullable<typeof courses>[0]) => {
@@ -183,8 +225,12 @@ export default function Courses() {
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-foreground mb-1.5 block">Link del curso (opcional)</label>
+                <label className="text-sm font-semibold text-foreground mb-1.5 block flex items-center gap-2">
+                  Link del curso (opcional)
+                  {extractingMetadata && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
+                </label>
                 <input {...register("courseLink")} type="url" placeholder="https://ejemplo.com/curso" className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-bloom" />
+                {extractingMetadata && <p className="text-xs text-muted-foreground mt-1.5">Extrayendo información del curso...</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

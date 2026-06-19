@@ -52,3 +52,15 @@
 - [x] Mostrar link como botón/icono en tarjeta de curso
 - [x] Filtrar jardín digital para mostrar solo cursos completados (ya estaba implementado)
 - [x] Tests para nuevo campo courseLink (14 tests pasando: validación URL, mock verification, casos opcionales)
+
+
+## Autocompletado Inteligente de Cursos - Iteración 3
+- [x] Crear endpoint backend para extraer metadatos de URL (título, descripción, imagen)
+- [x] Implementar scraping de Open Graph y meta tags
+- [x] Agregar router tRPC para courses.extractMetadata
+- [x] Implementar debounce en input courseLink del formulario
+- [x] Autocompletar título si está vacío
+- [x] Autocompletar descripción si está vacía
+- [x] Mostrar loading state mientras se extrae metadata
+- [x] Manejar errores de URLs inválidas o no accesibles
+- [x] Tests para endpoint de extracción de metadatos (14 tests pasando)

@@ -121,6 +121,52 @@ const coursesRouter = router({
       await deleteCourse(input.id, ctx.user.id);
       return { success: true };
     }),
+
+  extractMetadata: protectedProcedure
+    .input(z.object({ url: z.string().url() }))
+    .query(async ({ input }) => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const response = await fetch(input.url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          },
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "No se pudo acceder a la URL" });
+        }
+
+        const html = await response.text();
+        const titleMatch = html.match(/<meta\s+property=['"']og:title['"']\s+content=['"']([^'"']*)['"']/) ||
+                          html.match(/<title>([^<]*)<\/title>/) ||
+                          html.match(/<meta\s+name=['"']title['"']\s+content=['"']([^'"']*)['"']/) ||
+                          html.match(/<h1[^>]*>([^<]*)<\/h1>/);
+        const descriptionMatch = html.match(/<meta\s+property=['"']og:description['"']\s+content=['"']([^'"']*)['"']/) ||
+                                html.match(/<meta\s+name=['"']description['"']\s+content=['"']([^'"']*)['"']/) ||
+                                html.match(/<meta\s+name=['"']og:description['"']\s+content=['"']([^'"']*)['"']/) ||
+                                html.match(/<p[^>]*>([^<]*)<\/p>/);
+        const imageMatch = html.match(/<meta\s+property=['"']og:image['"']\s+content=['"']([^'"']*)['"']/) ||
+                          html.match(/<meta\s+name=['"']image['"']\s+content=['"']([^'"']*)['"']/) ||
+                          html.match(/<img[^>]+src=['"']([^'"']*)['"'][^>]*>/);
+
+        return {
+          title: titleMatch?.[1]?.trim().slice(0, 255) || null,
+          description: descriptionMatch?.[1]?.trim().slice(0, 500) || null,
+          image: imageMatch?.[1] || null,
+        };
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error al extraer metadatos de la URL",
+        });
+      }
+    }),
 });
 
 // ─── Tasks Router ─────────────────────────────────────────────────────────────
