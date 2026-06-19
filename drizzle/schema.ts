@@ -36,6 +36,7 @@ export const courses = mysqlTable("courses", {
   status: mysqlEnum("status", ["active", "completed", "paused"]).default("active").notNull(),
   color: varchar("color", { length: 20 }).default("#c4b5fd"),
   emoji: varchar("emoji", { length: 10 }).default("🌸"),
+  courseLink: varchar("courseLink", { length: 500 }),
   totalHours: float("totalHours").default(0).notNull(),
   completedAt: timestamp("completedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

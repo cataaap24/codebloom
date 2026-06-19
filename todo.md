@@ -42,3 +42,13 @@
 - [x] Tests para router de cursos
 - [x] Tests para router de tareas
 - [x] Tests para router de estadísticas
+
+
+## Cambios Solicitados - Iteración 2
+- [x] Agregar campo courseLink a tabla de cursos en BD
+- [x] Actualizar schema y generar migración
+- [x] Agregar input de link en formulario de cursos
+- [x] Rediseñar página de Cursos con estilo inspirado en notas (colores pastel)
+- [x] Mostrar link como botón/icono en tarjeta de curso
+- [x] Filtrar jardín digital para mostrar solo cursos completados (ya estaba implementado)
+- [ ] Tests para nuevo campo courseLink

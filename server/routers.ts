@@ -52,6 +52,7 @@ const coursesRouter = router({
         status: z.enum(["active", "completed", "paused"]).default("active"),
         color: z.string().optional(),
         emoji: z.string().optional(),
+        courseLink: z.string().url().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -70,6 +71,7 @@ const coursesRouter = router({
         status: z.enum(["active", "completed", "paused"]).optional(),
         color: z.string().optional(),
         emoji: z.string().optional(),
+        courseLink: z.string().url().optional(),
         totalHours: z.number().optional(),
       })
     )
