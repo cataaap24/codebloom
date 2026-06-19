@@ -9,6 +9,24 @@ import { es } from "date-fns/locale";
 
 const LANGUAGES = ["JavaScript", "TypeScript", "Python", "CSS", "HTML", "SQL", "Bash", "JSON", "Otro"];
 
+const NOTE_BG_COLORS = [
+  "bg-gradient-to-br from-pink-50 to-pink-100/40",
+  "bg-gradient-to-br from-purple-50 to-purple-100/40",
+  "bg-gradient-to-br from-blue-50 to-blue-100/40",
+  "bg-gradient-to-br from-emerald-50 to-emerald-100/40",
+  "bg-gradient-to-br from-amber-50 to-amber-100/40",
+  "bg-gradient-to-br from-red-50 to-red-100/40",
+];
+
+const NOTE_BORDER_COLORS = [
+  "border-pink-200/50",
+  "border-purple-200/50",
+  "border-blue-200/50",
+  "border-emerald-200/50",
+  "border-amber-200/50",
+  "border-red-200/50",
+];
+
 type FormData = {
   title: string;
   content: string;
@@ -85,17 +103,18 @@ export default function Notes() {
   });
 
   const getCourse = (courseId: number | null) => courses?.find((c) => c.id === courseId);
+  const getColorIndex = (id: number) => id % NOTE_BG_COLORS.length;
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3 animate-slide-in-up">
         <div>
-          <h1 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
-            <FileText className="w-6 h-6 text-amber-500" strokeWidth={1.8} />
-            Notas & Snippets
+          <h1 className="text-3xl font-extrabold text-foreground flex items-center gap-2">
+            <FileText className="w-8 h-8 text-amber-500" strokeWidth={1.8} />
+            Notas & Snippets 📝
           </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">{notes?.length ?? 0} notas guardadas</p>
+          <p className="text-muted-foreground text-sm mt-1">{notes?.length ?? 0} notas guardadas</p>
         </div>
         <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold shadow-bloom transition-bloom hover:bg-primary/90">
           <Plus className="w-4 h-4" strokeWidth={2.5} /> Nueva nota
@@ -110,7 +129,7 @@ export default function Notes() {
         </div>
         <div className="flex gap-2">
           {(["all", "note", "snippet"] as const).map((t) => (
-            <button key={t} onClick={() => setFilterType(t)} className={cn("px-3 py-2 rounded-xl text-xs font-semibold transition-bloom flex items-center gap-1.5", filterType === t ? "bg-primary text-white" : "bg-white text-muted-foreground hover:bg-muted border border-border")}>
+            <button key={t} onClick={() => setFilterType(t)} className={cn("px-3 py-2 rounded-xl text-xs font-semibold transition-bloom flex items-center gap-1.5", filterType === t ? "bg-primary text-white shadow-bloom" : "bg-muted text-muted-foreground hover:bg-muted/80")}>
               {t === "snippet" && <Code2 className="w-3.5 h-3.5" strokeWidth={2} />}
               {t === "all" ? "Todas" : t === "note" ? "Notas" : "Snippets"}
             </button>
@@ -139,19 +158,28 @@ export default function Notes() {
           {filtered.map((note) => {
             const course = getCourse(note.courseId);
             const isExpanded = expandedId === note.id;
+            const colorIndex = getColorIndex(note.id);
             return (
-              <div key={note.id} className={cn("bg-white rounded-2xl p-5 shadow-bloom transition-bloom hover:shadow-bloom-lg group", note.isSnippet && "border-l-4 border-primary/40")}>
-                <div className="flex items-start justify-between mb-2">
+              <div
+                key={note.id}
+                className={cn(
+                  "rounded-2xl p-5 shadow-bloom transition-bloom hover:shadow-bloom-lg group border",
+                  NOTE_BG_COLORS[colorIndex],
+                  NOTE_BORDER_COLORS[colorIndex],
+                  note.isSnippet && "ring-1 ring-primary/30"
+                )}
+              >
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     {note.isSnippet ? (
-                      <Code2 className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={1.8} />
+                      <Code2 className="w-5 h-5 text-primary flex-shrink-0" strokeWidth={1.8} />
                     ) : (
-                      <FileText className="w-4 h-4 text-amber-500 flex-shrink-0" strokeWidth={1.8} />
+                      <FileText className="w-5 h-5 text-amber-500 flex-shrink-0" strokeWidth={1.8} />
                     )}
                     <h3 className="font-bold text-sm text-foreground truncate">{note.title}</h3>
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-bloom flex-shrink-0">
-                    <button onClick={() => openEdit(note)} className="p-1.5 rounded-lg hover:bg-muted transition-bloom">
+                    <button onClick={() => openEdit(note)} className="p-1.5 rounded-lg hover:bg-white/50 transition-bloom">
                       <Pencil className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.8} />
                     </button>
                     <button onClick={() => { if (confirm("¿Eliminar esta nota?")) deleteMutation.mutate({ id: note.id }); }} className="p-1.5 rounded-lg hover:bg-destructive/10 transition-bloom">
@@ -163,42 +191,42 @@ export default function Notes() {
                 {note.content && (
                   <div className="mb-3">
                     {note.isSnippet ? (
-                      <pre className={cn("code-snippet p-3 text-xs overflow-x-auto", !isExpanded && "max-h-24 overflow-hidden")}>
+                      <pre className={cn("code-snippet p-3 text-xs overflow-x-auto rounded-lg bg-white/60 border border-white/50", !isExpanded && "max-h-24 overflow-hidden")}>
                         <code>{note.content}</code>
                       </pre>
                     ) : (
-                      <p className={cn("text-xs text-muted-foreground leading-relaxed", !isExpanded && "line-clamp-3")}>
+                      <p className={cn("text-xs text-foreground/80 leading-relaxed", !isExpanded && "line-clamp-3")}>
                         {note.content}
                       </p>
                     )}
                     {note.content.length > 150 && (
-                      <button onClick={() => setExpandedId(isExpanded ? null : note.id)} className="text-xs text-primary font-semibold mt-1 hover:underline">
+                      <button onClick={() => setExpandedId(isExpanded ? null : note.id)} className="text-xs text-primary font-semibold mt-2 hover:underline">
                         {isExpanded ? "Ver menos" : "Ver más"}
                       </button>
                     )}
                   </div>
                 )}
 
-                <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center justify-between flex-wrap gap-2 pt-3 border-t border-white/30">
                   <div className="flex items-center gap-2 flex-wrap">
                     {course && (
-                      <span className="text-xs px-2 py-0.5 rounded-lg bg-lavender-light text-primary font-semibold">
+                      <span className="text-xs px-2.5 py-1 rounded-lg bg-white/60 text-primary font-semibold">
                         {course.emoji} {course.name}
                       </span>
                     )}
                     {note.isSnippet && note.language && (
-                      <span className="text-xs px-2 py-0.5 rounded-lg bg-muted text-muted-foreground font-mono font-semibold">
+                      <span className="text-xs px-2 py-1 rounded-lg bg-white/40 text-muted-foreground font-mono font-semibold">
                         {note.language}
                       </span>
                     )}
                     {note.tags && note.tags.split(",").slice(0, 2).map((tag) => (
-                      <span key={tag} className="text-xs px-2 py-0.5 rounded-lg bg-beige text-amber-700 font-semibold flex items-center gap-1">
+                      <span key={tag} className="text-xs px-2.5 py-1 rounded-lg bg-white/50 text-foreground/70 font-semibold flex items-center gap-1">
                         <Tag className="w-2.5 h-2.5" strokeWidth={2} />
                         {tag.trim()}
                       </span>
                     ))}
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground/70 font-medium">
                     {format(new Date(note.updatedAt), "d MMM", { locale: es })}
                   </span>
                 </div>
@@ -244,7 +272,7 @@ export default function Notes() {
                   {...register("content")}
                   rows={watchIsSnippet ? 8 : 5}
                   placeholder={watchIsSnippet ? "// Tu código aquí..." : "Escribe tu nota..."}
-                  className={cn("w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-bloom resize-none", watchIsSnippet && "font-mono text-xs bg-slate-950 text-slate-100 border-slate-700")}
+                  className={cn("w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-bloom resize-none", watchIsSnippet && "font-mono")}
                 />
               </div>
 
@@ -272,7 +300,7 @@ export default function Notes() {
                 <input {...register("tags")} placeholder="react, hooks, estado" className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-bloom" />
               </div>
 
-              <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-bloom transition-bloom hover:bg-primary/90 disabled:opacity-60">
+              <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-bloom transition-bloom hover:bg-primary/90 disabled:opacity-50">
                 {createMutation.isPending || updateMutation.isPending ? "Guardando..." : editId ? "Guardar cambios" : "Crear nota"}
               </button>
             </form>
