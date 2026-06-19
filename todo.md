@@ -51,4 +51,4 @@
 - [x] Rediseñar página de Cursos con estilo inspirado en notas (colores pastel)
 - [x] Mostrar link como botón/icono en tarjeta de curso
 - [x] Filtrar jardín digital para mostrar solo cursos completados (ya estaba implementado)
-- [ ] Tests para nuevo campo courseLink
+- [x] Tests para nuevo campo courseLink (14 tests pasando: validación URL, mock verification, casos opcionales)

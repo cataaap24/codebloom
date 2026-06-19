@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import * as db from "./db";
 
 // Mock DB helpers
 vi.mock("./db", () => ({
@@ -69,6 +70,21 @@ describe("CodeBloom - Courses Router", () => {
       status: "active",
       color: "#c4b5fd",
       emoji: "🌸",
+      courseLink: "https://example.com/react",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("creates a course with optional courseLink", async () => {
+    const caller = appRouter.createCaller(createAuthContext());
+    const result = await caller.courses.create({
+      name: "Python Avanzado",
+      description: "Aprende Python avanzado",
+      category: "Backend",
+      progress: 0,
+      status: "active",
+      color: "#93c5fd",
+      emoji: "🚀",
     });
     expect(result.success).toBe(true);
   });
@@ -154,3 +170,46 @@ describe("CodeBloom - Calendar Router", () => {
     expect(result.success).toBe(true);
   });
 });
+
+  it("validates courseLink URL format", async () => {
+    const caller = appRouter.createCaller(createAuthContext());
+    try {
+      await caller.courses.create({
+        name: "Invalid Link Course",
+        description: "Test",
+        category: "Frontend",
+        progress: 0,
+        status: "active",
+        color: "#c4b5fd",
+        emoji: "🌸",
+        courseLink: "not-a-valid-url",
+      });
+      expect.fail("Should have thrown validation error");
+    } catch (error: any) {
+      expect(error.code).toBe("BAD_REQUEST");
+    }
+  });
+
+  it("passes courseLink to createCourse db function", async () => {
+    const mockCreateCourse = vi.mocked(db.createCourse);
+    mockCreateCourse.mockClear();
+    
+    const caller = appRouter.createCaller(createAuthContext());
+    const result = await caller.courses.create({
+      name: "React con Link",
+      description: "Test",
+      category: "Frontend",
+      progress: 0,
+      status: "active",
+      color: "#c4b5fd",
+      emoji: "🌸",
+      courseLink: "https://udemy.com/react-course",
+    });
+    
+    expect(result.success).toBe(true);
+    expect(mockCreateCourse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        courseLink: "https://udemy.com/react-course",
+      })
+    );
+  });
