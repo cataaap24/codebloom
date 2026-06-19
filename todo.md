@@ -64,3 +64,21 @@
 - [x] Mostrar loading state mientras se extrae metadata
 - [x] Manejar errores de URLs inválidas o no accesibles
 - [x] Tests para endpoint de extracción de metadatos (14 tests pasando)
+
+
+## Iteración 4 - Mejoras Visuales y Funcionalidades
+- [x] Arreglar el link de cursos (validación URL flexible) (ExternalLink button)
+- [x] Agregar animación de resaltado en campos autocompletados
+- [x] Crear tabla de public_gardens en BD
+- [ ] Endpoint para generar enlace público del jardín
+- [ ] Página pública para ver jardín compartido
+- [ ] Botón "Compartir" en página del jardín
+- [ ] Crear tabla de reminders en BD
+- [ ] Endpoint para crear recordatorios automáticos
+- [ ] Notificaciones para tareas con fecha límite en 24h
+- [ ] Fondo gradiente pastel en jardín digital
+- [ ] Agregar cielo con nubes animadas
+- [ ] Agregar sol animado
+- [ ] Mostrar contador de flores
+- [ ] Fondos pastel coloreados para notas
+- [ ] Selector de color pastel en notas

@@ -22,6 +22,13 @@
       "when": 1781831382923,
       "tag": "0002_cuddly_jack_power",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1781894831208,
+      "tag": "0003_familiar_ted_forrester",
+      "breakpoints": true
     }
   ]
 }

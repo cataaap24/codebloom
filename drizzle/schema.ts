@@ -145,3 +145,16 @@ export const achievements = mysqlTable("achievements", {
 
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = typeof achievements.$inferInsert;
+
+// ─── Public Gardens ──────────────────────────────────────────────────────────
+export const publicGardens = mysqlTable("publicGardens", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  shareToken: varchar("shareToken", { length: 64 }).notNull().unique(),
+  isPublic: boolean("isPublic").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PublicGarden = typeof publicGardens.$inferSelect;
+export type InsertPublicGarden = typeof publicGardens.$inferInsert;

@@ -71,6 +71,7 @@ export default function Courses() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<CourseStatus | "all">("all");
   const [extractingMetadata, setExtractingMetadata] = useState(false);
+  const [highlightedField, setHighlightedField] = useState<string | null>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({
@@ -94,10 +95,14 @@ export default function Courses() {
         if (metadata) {
           if (metadata.title && !watch("name")) {
             setValue("name", metadata.title);
+            setHighlightedField("name");
+            setTimeout(() => setHighlightedField(null), 1500);
             toast.success("Título extraído automáticamente ✨");
           }
           if (metadata.description && !watch("description")) {
             setValue("description", metadata.description);
+            setHighlightedField("description");
+            setTimeout(() => setHighlightedField(null), 1500);
           }
         }
       } catch (error: any) {
@@ -197,13 +202,13 @@ export default function Courses() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <label className="text-sm font-semibold text-foreground mb-1.5 block">Nombre del curso</label>
-                <input {...register("name", { required: true })} placeholder="Ej: React Avanzado" className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-bloom" />
+                <label className="text-sm font-semibold text-foreground mb-1.5 block">Nombre</label>
+                <input {...register("name", { required: true })} placeholder="Ej: React Avanzado" className={cn("w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-bloom", highlightedField === "name" && "ring-2 ring-primary/50 bg-primary/5 animate-pulse")} />
               </div>
 
               <div>
                 <label className="text-sm font-semibold text-foreground mb-1.5 block">Descripción</label>
-                <textarea {...register("description")} placeholder="Detalles del curso..." className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-bloom resize-none h-20" />
+                <textarea {...register("description")} placeholder="Detalles del curso..." className={cn("w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-bloom resize-none h-20", highlightedField === "description" && "ring-2 ring-primary/50 bg-primary/5 animate-pulse")} />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
