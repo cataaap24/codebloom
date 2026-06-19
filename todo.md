@@ -1,0 +1,44 @@
+# CodeBloom - TODO
+
+## Setup & Base
+- [x] Configurar esquema de base de datos (cursos, tareas, notas, estadísticas, jardín)
+- [x] Aplicar migraciones SQL
+- [x] Configurar estilos globales pastel con tipografía Nunito
+- [x] Configurar paleta de colores: lavanda, rosa suave, beige, azul cielo
+
+## Backend (tRPC Routers)
+- [x] Router de cursos: CRUD completo (nombre, descripción, categoría, progreso, estado)
+- [x] Router de tareas: CRUD con etiquetas, prioridad, fecha límite, estado
+- [x] Router de notas/snippets: CRUD con soporte de texto enriquecido y etiquetado por curso
+- [x] Router de estadísticas: horas acumuladas, racha de días, cursos completados
+- [x] Router de jardín digital: flores por curso completado
+- [x] Router de sesiones de estudio: registro de tiempo activo
+- [x] Router de calendario: eventos y sesiones semanales
+
+## Frontend - Layout
+- [x] Configurar DashboardLayout con sidebar de navegación pastel
+- [x] Sidebar con íconos outline y navegación entre módulos
+- [x] Header con nombre de usuario y avatar
+- [x] Diseño responsive mobile-friendly
+
+## Frontend - Páginas
+- [x] Dashboard principal: resumen de progreso, tareas pendientes, logros recientes
+- [x] Página de Cursos: lista con tarjetas, CRUD completo, barra de progreso
+- [x] Página de Tareas: lista filtrable por etiqueta/prioridad, checkbox animado
+- [x] Página de Calendario semanal: visualización de sesiones y fechas de entrega
+- [x] Página de Notas/Snippets: editor con etiquetado por curso
+- [x] Página de Estadísticas: gráficos de horas, racha, cursos completados
+- [x] Jardín Digital: flores animadas por curso completado
+
+## Funcionalidades Especiales
+- [x] Animación de flor creciendo al completar un curso
+- [x] Racha de días activos calculada desde sesiones reales
+- [x] Horas acumuladas desde registro de sesiones de estudio
+- [x] Estadísticas reflejan datos reales de uso
+- [x] Microinteracciones suaves en todos los elementos interactivos
+- [x] Notificación toast al completar curso / tarea
+
+## Tests
+- [x] Tests para router de cursos
+- [x] Tests para router de tareas
+- [x] Tests para router de estadísticas
