@@ -7,6 +7,7 @@ import {
   gardenFlowers,
   InsertUser,
   notes,
+  publicGardens,
   studySessions,
   tasks,
   users,
@@ -292,4 +293,27 @@ export async function getDashboardStats(userId: number) {
     totalHours,
     streak: studyStats.streak,
   };
+}
+
+// ─── Public Gardens ───────────────────────────────────────────────────────────
+
+export async function createPublicGarden(userId: number, shareToken: string) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [result] = await db.insert(publicGardens).values({ userId, shareToken, isPublic: true });
+  return result;
+}
+
+export async function getPublicGardenByToken(shareToken: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(publicGardens).where(eq(publicGardens.shareToken, shareToken)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getPublicGardenByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(publicGardens).where(eq(publicGardens.userId, userId)).limit(1);
+  return result.length > 0 ? result[0] : null;
 }

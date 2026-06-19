@@ -1,10 +1,11 @@
-import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
-import { Flower2, Sparkles, BookOpen } from "lucide-react";
+import { Flower2, Sparkles, BookOpen, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 // ─── Flower SVG Components ────────────────────────────────────────────────────
 
@@ -123,6 +124,14 @@ function BloomSparkles() {
 export default function Garden() {
   const { data: flowers, isLoading } = trpc.garden.flowers.useQuery();
   const { data: courses } = trpc.courses.list.useQuery();
+  const shareMutation = trpc.garden.share.useMutation({
+    onSuccess: (data) => {
+      const fullUrl = `${window.location.origin}/garden-public/${data.shareToken}`;
+      navigator.clipboard.writeText(fullUrl);
+      toast.success("Enlace copiado al portapapeles", { description: fullUrl });
+    },
+    onError: () => toast.error("Error al generar enlace de compartir"),
+  });
   const [newFlowerIds, setNewFlowerIds] = useState<Set<number>>(new Set());
   const [showSparkles, setShowSparkles] = useState(false);
   const [prevCount, setPrevCount] = useState(0);
@@ -155,9 +164,19 @@ export default function Garden() {
             {flowers?.length ?? 0} flores · cada una representa un curso completado
           </p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-semibold">
-          <Sparkles className="w-4 h-4" />
-          Completa cursos para hacer crecer flores
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => shareMutation.mutate()}
+            disabled={shareMutation.isPending}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
+          >
+            <Share2 className="w-4 h-4" />
+            {shareMutation.isPending ? "Generando..." : "Compartir"}
+          </button>
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-semibold">
+            <Sparkles className="w-4 h-4" />
+            Completa cursos para hacer crecer flores
+          </div>
         </div>
       </div>
 

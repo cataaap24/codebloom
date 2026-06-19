@@ -1,6 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { nanoid } from "nanoid";
 import {
   createAchievement,
   createCalendarEvent,
@@ -27,6 +28,9 @@ import {
   updateCourse,
   updateNote,
   updateTask,
+  createPublicGarden,
+  getPublicGardenByUserId,
+  getPublicGardenByToken,
 } from "./db";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -364,6 +368,21 @@ const calendarRouter = router({
 // ─── Garden Router ────────────────────────────────────────────────────────────
 const gardenRouter = router({
   flowers: protectedProcedure.query(({ ctx }) => getGardenFlowersByUser(ctx.user.id)),
+  share: protectedProcedure.mutation(async ({ ctx }) => {
+    const existing = await getPublicGardenByUserId(ctx.user.id);
+    if (existing) return { shareToken: existing.shareToken, url: `/garden/${existing.shareToken}` };
+    const shareToken = nanoid(32);
+    await createPublicGarden(ctx.user.id, shareToken);
+    return { shareToken, url: `/garden/${shareToken}` };
+  }),
+  getPublic: publicProcedure
+    .input(z.object({ shareToken: z.string() }))
+    .query(async ({ input }) => {
+      const garden = await getPublicGardenByToken(input.shareToken);
+      if (!garden) throw new TRPCError({ code: "NOT_FOUND" });
+      const flowers = await getGardenFlowersByUser(garden.userId);
+      return { flowers, userId: garden.userId };
+    }),
 });
 
 // ─── Stats Router ─────────────────────────────────────────────────────────────

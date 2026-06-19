@@ -70,9 +70,9 @@
 - [x] Arreglar el link de cursos (validación URL flexible) (ExternalLink button)
 - [x] Agregar animación de resaltado en campos autocompletados
 - [x] Crear tabla de public_gardens en BD
-- [ ] Endpoint para generar enlace público del jardín
+- [x] Endpoint para generar enlace público del jardín
 - [ ] Página pública para ver jardín compartido
-- [ ] Botón "Compartir" en página del jardín
+- [x] Botón "Compartir" en página del jardín
 - [ ] Crear tabla de reminders en BD
 - [ ] Endpoint para crear recordatorios automáticos
 - [ ] Notificaciones para tareas con fecha límite en 24h
