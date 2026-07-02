@@ -28,21 +28,25 @@ export async function getDb() {
   return _db;
 }
 
-// ─── Users ────────────────────────────────────────────────────────────────────
+// ─── Users ───────────────────────────────────────────────────────────[...]
 
 export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) throw new Error("User openId is required for upsert");
+  if (!user.email) throw new Error("User email is required for upsert");
   const db = await getDb();
   if (!db) return;
-  const values: InsertUser = { openId: user.openId };
+  const values: InsertUser = { email: user.email };
   const updateSet: Record<string, unknown> = {};
-  const textFields = ["name", "email", "loginMethod"] as const;
+  const textFields = ["name", "loginMethod"] as const;
   for (const field of textFields) {
     const value = user[field];
     if (value === undefined) continue;
     const normalized = value ?? null;
     values[field] = normalized;
     updateSet[field] = normalized;
+  }
+  if (user.passwordHash !== undefined) {
+    values.passwordHash = user.passwordHash;
+    updateSet.passwordHash = user.passwordHash;
   }
   if (user.lastSignedIn !== undefined) {
     values.lastSignedIn = user.lastSignedIn;
@@ -51,13 +55,24 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   if (user.role !== undefined) {
     values.role = user.role;
     updateSet.role = user.role;
-  } else if (user.openId === ENV.ownerOpenId) {
-    values.role = "admin";
-    updateSet.role = "admin";
   }
   if (!values.lastSignedIn) values.lastSignedIn = new Date();
   if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
   await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+}
+
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result[0];
+}
+
+export async function getUserById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return result[0];
 }
 
 export async function getUserByOpenId(openId: string) {
@@ -67,7 +82,20 @@ export async function getUserByOpenId(openId: string) {
   return result[0];
 }
 
-// ─── Courses ─────────────────────────────────────────────────────────────────
+export async function createUser(data: InsertUser) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [result] = await db.insert(users).values(data);
+  return result;
+}
+
+export async function updateUser(id: number, data: Partial<InsertUser>) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(users).set(data).where(eq(users.id, id));
+}
+
+// ─── Courses ──────────────────────────────────────────────────────────[...]
 
 export async function getCoursesByUser(userId: number) {
   const db = await getDb();
@@ -101,7 +129,7 @@ export async function deleteCourse(id: number, userId: number) {
   await db.delete(courses).where(and(eq(courses.id, id), eq(courses.userId, userId)));
 }
 
-// ─── Tasks ────────────────────────────────────────────────────────────────────
+// ─── Tasks ──────────────────────────────────────────────────────────[...]
 
 export async function getTasksByUser(userId: number) {
   const db = await getDb();
@@ -128,7 +156,7 @@ export async function deleteTask(id: number, userId: number) {
   await db.delete(tasks).where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
 }
 
-// ─── Notes ────────────────────────────────────────────────────────────────────
+// ─── Notes ──────────────────────────────────────────────────────────[...]
 
 export async function getNotesByUser(userId: number) {
   const db = await getDb();
@@ -155,7 +183,7 @@ export async function deleteNote(id: number, userId: number) {
   await db.delete(notes).where(and(eq(notes.id, id), eq(notes.userId, userId)));
 }
 
-// ─── Study Sessions ───────────────────────────────────────────────────────────
+// ─── Study Sessions ───────────────────────────────────────────────────────[...]
 
 export async function getStudySessionsByUser(userId: number) {
   const db = await getDb();
@@ -209,7 +237,7 @@ export async function getStudyStats(userId: number) {
   return { totalMinutes, totalSessions, streak };
 }
 
-// ─── Calendar Events ──────────────────────────────────────────────────────────
+// ─── Calendar Events ───────────────────────────────────────────────────────[...]
 
 export async function getCalendarEventsByUser(userId: number, startDate?: Date, endDate?: Date) {
   const db = await getDb();
@@ -239,7 +267,7 @@ export async function deleteCalendarEvent(id: number, userId: number) {
   await db.delete(calendarEvents).where(and(eq(calendarEvents.id, id), eq(calendarEvents.userId, userId)));
 }
 
-// ─── Garden Flowers ───────────────────────────────────────────────────────────
+// ─── Garden Flowers ───────────────────────────────────────────────────────[...]
 
 export async function getGardenFlowersByUser(userId: number) {
   const db = await getDb();
@@ -254,7 +282,7 @@ export async function createGardenFlower(data: typeof gardenFlowers.$inferInsert
   return result;
 }
 
-// ─── Achievements ─────────────────────────────────────────────────────────────
+// ─── Achievements ────────────────────────────────────────────────────────[...]
 
 export async function getAchievementsByUser(userId: number) {
   const db = await getDb();
@@ -269,7 +297,7 @@ export async function createAchievement(data: typeof achievements.$inferInsert) 
   return result;
 }
 
-// ─── Dashboard Stats ──────────────────────────────────────────────────────────
+// ─── Dashboard Stats ───────────────────────────────────────────────────────[...]
 
 export async function getDashboardStats(userId: number) {
   const db = await getDb();
@@ -295,7 +323,7 @@ export async function getDashboardStats(userId: number) {
   };
 }
 
-// ─── Public Gardens ───────────────────────────────────────────────────────────
+// ─── Public Gardens ───────────────────────────────────────────────────────[...]
 
 export async function createPublicGarden(userId: number, shareToken: string) {
   const db = await getDb();

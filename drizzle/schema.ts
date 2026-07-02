@@ -12,10 +12,11 @@ import {
 
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
-  openId: varchar("openId", { length: 64 }).notNull().unique(),
+  openId: varchar("openId", { length: 64 }).unique(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 255 }),
   name: text("name"),
-  email: varchar("email", { length: 320 }),
-  loginMethod: varchar("loginMethod", { length: 64 }),
+  loginMethod: varchar("loginMethod", { length: 64 }).default("jwt"),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -25,7 +26,7 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// ─── Courses ─────────────────────────────────────────────────────────────────
+// ─── Courses ──────────────────────────────────────────────────────────[...]
 export const courses = mysqlTable("courses", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -46,7 +47,7 @@ export const courses = mysqlTable("courses", {
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = typeof courses.$inferInsert;
 
-// ─── Tasks ────────────────────────────────────────────────────────────────────
+// ─── Tasks ───────────────────────────────────────────────────────────[...]
 export const tasks = mysqlTable("tasks", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -65,13 +66,14 @@ export const tasks = mysqlTable("tasks", {
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = typeof tasks.$inferInsert;
 
-// ─── Notes ────────────────────────────────────────────────────────────────────
+// ─── Notes ───────────────────────────────────────────────────────────[...]
 export const notes = mysqlTable("notes", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   courseId: int("courseId"),
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content"),
+  backgroundColor: varchar("backgroundColor", { length: 20 }).default("#fef3c7"),
   isSnippet: boolean("isSnippet").default(false).notNull(),
   language: varchar("language", { length: 50 }),
   tags: text("tags"),
@@ -82,7 +84,7 @@ export const notes = mysqlTable("notes", {
 export type Note = typeof notes.$inferSelect;
 export type InsertNote = typeof notes.$inferInsert;
 
-// ─── Study Sessions ───────────────────────────────────────────────────────────
+// ─── Study Sessions ────────────────────────────────────────────────────────[...]
 export const studySessions = mysqlTable("study_sessions", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -96,7 +98,7 @@ export const studySessions = mysqlTable("study_sessions", {
 export type StudySession = typeof studySessions.$inferSelect;
 export type InsertStudySession = typeof studySessions.$inferInsert;
 
-// ─── Calendar Events ──────────────────────────────────────────────────────────
+// ─── Calendar Events ───────────────────────────────────────────────────────[...]
 export const calendarEvents = mysqlTable("calendar_events", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -116,7 +118,7 @@ export const calendarEvents = mysqlTable("calendar_events", {
 export type CalendarEvent = typeof calendarEvents.$inferSelect;
 export type InsertCalendarEvent = typeof calendarEvents.$inferInsert;
 
-// ─── Garden Flowers ───────────────────────────────────────────────────────────
+// ─── Garden Flowers ───────────────────────────────────────────────────────[...]
 export const gardenFlowers = mysqlTable("garden_flowers", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -132,7 +134,7 @@ export const gardenFlowers = mysqlTable("garden_flowers", {
 export type GardenFlower = typeof gardenFlowers.$inferSelect;
 export type InsertGardenFlower = typeof gardenFlowers.$inferInsert;
 
-// ─── Achievements ─────────────────────────────────────────────────────────────
+// ─── Achievements ────────────────────────────────────────────────────────[...]
 export const achievements = mysqlTable("achievements", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -146,7 +148,7 @@ export const achievements = mysqlTable("achievements", {
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = typeof achievements.$inferInsert;
 
-// ─── Public Gardens ──────────────────────────────────────────────────────────
+// ─── Public Gardens ───────────────────────────────────────────────────────[...]
 export const publicGardens = mysqlTable("publicGardens", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
